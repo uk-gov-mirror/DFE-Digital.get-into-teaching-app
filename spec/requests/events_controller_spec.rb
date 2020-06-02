@@ -31,23 +31,46 @@ describe EventsController do
     let(:search_key) { Events::Search.model_name.param_key }
     let(:search_path) { search_events_path(search_key => search_params) }
 
-    subject do
-      get(search_path)
-      response
+    context "for HTML page request" do
+      subject do
+        get(search_path)
+        response
+      end
+
+      context "with valid search params" do
+        let(:search_params) { attributes_for :events_search }
+
+        it { is_expected.to have_http_status :success }
+        it { is_expected.to have_attributes media_type: "text/html" }
+      end
+
+      context "with invalid search params" do
+        let(:search_params) { { "distance" => "" } }
+
+        it { is_expected.to have_http_status :success }
+        it { is_expected.to have_attributes media_type: "text/html" }
+      end
     end
 
-    context "with valid search params" do
-      let(:search_params) { attributes_for :events_search }
+    context "for XHR page request" do
+      subject do
+        get(search_path, xhr: true)
+        response
+      end
 
-      it { is_expected.to have_http_status :success }
-      it { is_expected.to have_attributes media_type: "text/html" }
-    end
+      context "with valid search params" do
+        let(:search_params) { attributes_for :events_search }
 
-    context "with invalid search params" do
-      let(:search_params) { { "distance" => "" } }
+        it { is_expected.to have_http_status :success }
+        it { is_expected.to have_attributes media_type: "text/javascript" }
+      end
 
-      it { is_expected.to have_http_status :success }
-      it { is_expected.to have_attributes media_type: "text/html" }
+      context "with invalid search params" do
+        let(:search_params) { { "distance" => "" } }
+
+        it { is_expected.to have_http_status :success }
+        it { is_expected.to have_attributes media_type: "text/javascript" }
+      end
     end
   end
 

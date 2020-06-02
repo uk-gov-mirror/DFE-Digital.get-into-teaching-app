@@ -1,0 +1,8 @@
+document.
+  querySelector('.search-for-events__content').
+  innerHTML = "<%= j render "search_form", event_search: @event_search %>" ;
+
+document.
+  querySelector('.search-for-events-results').
+  innerHTML = "<%= j render partial: "event", collection: @events %>" ;
+
