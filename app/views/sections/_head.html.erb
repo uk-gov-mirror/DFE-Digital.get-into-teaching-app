@@ -8,4 +8,33 @@
   <%= tag :link, rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' %>
   <%= stylesheet_pack_tag 'application', 'data-turbolinks-track': 'reload', media: 'all' %>
   <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload', defer: true %>
+
+  <style>
+
+      <% if imagemobile %>
+        .hero {
+          background-image: url('<%= hero_image_path imagemobile %>');
+        }
+        <% if imagemobileretina %>
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) { 
+          .hero {
+            background-image: url('<%= hero_image_path imagemobileretina %>');
+          }
+        }
+        <% end %>
+        <% if image %>
+        @media (min-width: 700px) {
+          .hero {
+            background-image: url('<%= hero_image_path image %>');
+          }
+        }
+        <% end %>
+      <% else %>
+        <% if image %>
+          .hero {
+            background-image: url('<%= hero_image_path image %>');
+          }
+        <% end %>
+      <% end %>
+  </style>
 </head>
