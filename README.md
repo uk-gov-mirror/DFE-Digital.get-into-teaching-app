@@ -116,13 +116,14 @@ The application has 2 extra Rails environments, in addition to the default 3.
 3. `production` - the 'live' production copy of the application
 4. `rolling` - 'production-like' - continuously delivered, reflects current master
 5. `preprod` - 'production-like' - stage before release to final production
+6. `userresearch` - 'production-like' - used for separate user research version
 
 **NOTE:** It is **important** if checking for the production environment to also 
 check for other 'production-like' environments unless you really intend to only
 check for production, ie.
 
 ```ruby
-if Rails.env.rolling? || Rails.env.preprod? || Rails
+if Rails.env.rolling? || Rails.env.preprod? || Rails.env.production? || Rails.env.userresearch?
 ```
 
 ### Public Configuration
@@ -136,6 +137,7 @@ files for each environment
 1. `/.env.production`
 2. `/.env.rolling`
 3. `/.env.preprod`
+3. `/.env.userresearch`
 
 ### Private Configuration - ie secrets
 
@@ -154,5 +156,22 @@ environments master key in.
 `HTTPAUTH_USERNAME` and `HTTPAUTH_PASSWORD` - setting both enables site wide 
 password protection
 
+### Page variants
 
+The `userresearch` environment supports alternative versions of pages for 
+testing with. To create an alternative page version, create it a new file 
+alongside the page you wish to research and replace the extensions with 
+`.html+ur.erb`. So
+
+```
+/app/views/events/index.html.erb
+```
+
+should be copied to the following and changed appropriately.
+
+```
+/app/views/events/index.html+ur.erb
+``` 
+
+**NOTE:** Do not remove the original page
 
