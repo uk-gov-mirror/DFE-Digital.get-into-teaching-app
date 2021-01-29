@@ -1,4 +1,6 @@
 .call-to-action {
+  @include hide-at-breakpoints;
+
   background-color: $grey;
   padding: 0;
   margin-bottom: 2em;
