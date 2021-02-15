@@ -21,6 +21,10 @@ class EventsController < ApplicationController
     @page_title = @event.name
   end
 
+  def not_available
+    render "not_available"
+  end
+
 private
 
   def load_upcoming_events

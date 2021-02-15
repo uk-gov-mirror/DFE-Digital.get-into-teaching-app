@@ -1,6 +1,12 @@
 class ApplicationController < ActionController::Base
   include UtmCodes
 
+  @var = "none"
+
+  class << self
+    attr_accessor :b
+  end
+
   rescue_from ActionController::RoutingError, with: :render_not_found
   rescue_from GetIntoTeachingApiClient::ApiError, with: :handle_api_error
 
@@ -11,9 +17,28 @@ class ApplicationController < ActionController::Base
     raise ActionController::RoutingError, "Not Found"
   end
 
-private
+  private
+
+  def circuit_breaker(error)
+    light = Stoplight("api-error") { raise error }.with_threshold(3)
+                                                  .with_fallback { |e| p e; "default" }
+    puts @var
+
+    light.run
+    puts light.color
+    @var = light.color
+  end
+
+  def redirect_to_not_available
+    controller = request.path[:controller]
+    redirect_to controller => controller, :action => :not_available
+  end
 
   def handle_api_error(error)
+    circuit_breaker(error)
+    redirect_to_not_available && return if error.code == 500 &&
+      @var == "red"
+
     render_too_many_requests && return if error.code == 429
     render_not_found && return if error.code == 404
 

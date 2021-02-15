@@ -312,6 +312,7 @@ GEM
       actionpack (>= 4.0)
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
+    stoplight (2.2.1)
     thor (1.1.0)
     thread_safe (0.3.6)
     typhoeus (1.4.0)
