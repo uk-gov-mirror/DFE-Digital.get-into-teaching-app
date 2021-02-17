@@ -1,6 +1,7 @@
 class EventStepsController < ApplicationController
+  include CircuitBreaker
+
   before_action :load_event
-  before_action redirect_to events_not_available_path if @circuit_breaker_open
 
   include WizardSteps
   self.wizard_class = Events::Wizard
@@ -10,6 +11,12 @@ class EventStepsController < ApplicationController
   before_action :set_completed_page_title, only: [:completed]
 
   layout "events/registration"
+
+protected
+
+def not_available_path
+  events_not_available_path
+end
 
 private
 

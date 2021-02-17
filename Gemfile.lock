@@ -389,6 +389,7 @@ DEPENDENCIES
   simplecov (~> 0.17.1)
   spring
   spring-watcher-listen (~> 2.0.0)
+  stoplight
   tzinfo-data
   view_component
   web-console (>= 3.3.0)

@@ -2,7 +2,6 @@ require "rails_helper"
 
 describe "Circuit breaker" do
   let(:error) { GetIntoTeachingApiClient::ApiError.new(code: 500) }
-  before(:each) { Rails.application.config.action_dispatch.show_exceptions = true }
 
   context "when the API returns a single error" do
     before do
