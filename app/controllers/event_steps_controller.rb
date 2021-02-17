@@ -1,5 +1,6 @@
 class EventStepsController < ApplicationController
   before_action :load_event
+  before_action redirect_to events_not_available_path if @circuit_breaker_open
 
   include WizardSteps
   self.wizard_class = Events::Wizard
