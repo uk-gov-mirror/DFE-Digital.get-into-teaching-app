@@ -1,11 +1,8 @@
-<div class="card card-chat-online <%= modifier_classes %>">
-  <header class="card__header">
+<div class="card card-chat-online">
+  <%= image_pack_tag "icon-doc-black.svg", alt: "icon containing learning materials" %>
+  <h3 class="card__header">
     <%= truncated_header %>
-  </header>
-
-  <a href="#" data-controller="talk-to-us" data-action="talk-to-us#startChat" class="card__thumb">
-    <%= thumbnail_image_tag %>
-  </a>
+  </h3>
 
   <div class="card__snippet">
     <p><%= snippet %><p>

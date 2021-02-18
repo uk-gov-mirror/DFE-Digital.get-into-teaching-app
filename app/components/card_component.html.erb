@@ -1,11 +1,10 @@
-<div class="card <%= modifier_classes %>">
+<div class="card">
   <% if header %>
-  <header class="card__header">
+<%= image_pack_tag "icon-doc-black.svg", alt: "icon containing learning materials" %>
+  <h3 class="card__header">
     <%= truncated_header %>
-  </header>
+  </h3>
   <% end %>
-
-  <%= media_link %>
 
   <% if title %>
   <h3>
