@@ -1,4 +1,6 @@
 class EventsController < ApplicationController
+  include CircuitBreaker
+
   before_action :load_event_search, only: %i[search index]
   before_action :search_events, only: %i[search]
   before_action :load_upcoming_events, only: %i[index]
@@ -23,6 +25,10 @@ class EventsController < ApplicationController
 
   def not_available
     render "not_available"
+  end
+
+  def not_available_path
+    events_not_available_path
   end
 
 private

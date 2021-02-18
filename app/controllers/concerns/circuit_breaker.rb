@@ -1,15 +1,18 @@
 module CircuitBreaker
-  class CircuitBrokenError < RuntimeError;
+  class CircuitBrokenError < RuntimeError; end
+  class NotAvailablePathMissingError < RuntimeError; end
 
   extend ActiveSupport::Concern
 
-  CIRCUIT_BREAKER_THRESHOLD = 3
+  THRESHOLD = 3
+  COOL_OFF_TIME = 5.minutes
 
-  rescue_from GetIntoTeachingApiClient::ApiError, with: :update_circuit_breaker
-  rescue_from CircuitBreaker::CircuitBrokenError, with: :redirect_to_not_available
+  included do
+    before_action :check_api_available
 
-  before_action :set_api_available
-  before_action  unless @api_available
+    rescue_from GetIntoTeachingApiClient::ApiError, with: :update_circuit_breaker
+    rescue_from CircuitBreaker::CircuitBrokenError, with: :redirect_to_not_available
+  end
 
 protected
 
@@ -18,19 +21,23 @@ protected
   end
 
   def not_available_path
-    raise NotImplementedError
+    raise NotAvailablePathMissingError
   end
 
 private
 
   def update_circuit_breaker(error)
-    return unless error.code == 500
+    if error.code == 500
+      light = Stoplight("api-error") { raise error }.with_threshold(THRESHOLD).with_cool_off_time(COOL_OFF_TIME)
+      light.run
+    end
 
-    light = Stoplight("api-error") { raise error }.with_threshold(CIRCUIT_BREAKER_THRESHOLD)
-    light.run
+    raise
+  rescue Stoplight::Error::RedLight
+    raise CircuitBreaker::CircuitBrokenError
   end
 
-  def set_api_available
-    @api_available = Stoplight("api-error").color != "red"
+  def check_api_available
+    raise CircuitBreaker::CircuitBrokenError if Stoplight("api-error").color == "red"
   end
 end

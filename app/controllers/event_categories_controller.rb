@@ -1,4 +1,6 @@
 class EventCategoriesController < ApplicationController
+  include CircuitBreaker
+
   before_action -> { @period = :past }, only: %i[show_archive]
   before_action -> { @period = :future }, only: %i[show]
   before_action :load_type, :load_events, :set_form_action
@@ -15,6 +17,12 @@ class EventCategoriesController < ApplicationController
     raise_not_found && return unless has_archive?(@type)
 
     render :show
+  end
+
+protected
+
+  def not_available_path
+    events_not_available_path
   end
 
 private

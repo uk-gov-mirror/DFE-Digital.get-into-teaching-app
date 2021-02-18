@@ -14,9 +14,9 @@ class EventStepsController < ApplicationController
 
 protected
 
-def not_available_path
-  events_not_available_path
-end
+  def not_available_path
+    events_not_available_path
+  end
 
 private
 
