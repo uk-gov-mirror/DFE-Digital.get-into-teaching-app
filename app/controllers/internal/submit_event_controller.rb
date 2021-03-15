@@ -1,7 +1,7 @@
 module Internal
   class SubmitEventController < InternalController
     def new
-      @minimal = true
+      # @minimal = true
       @submit_event = SubmitEventForm.new
       render "submit_event_form", layout: "internal"
     end
