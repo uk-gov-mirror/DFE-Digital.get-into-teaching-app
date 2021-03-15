@@ -18,6 +18,10 @@ Rails.application.routes.draw do
     get "/assets/*missing", to: "errors#not_found", via: :all
   end
 
+  get "/internal/pending-events", to: "internal/pending_events#index", as: nil
+  get "/internal/submit-event", to: "internal/submit_event#new", as: nil
+  post "/internal/submit-event", to: "internal/submit_event#create"
+
   get "/privacy-policy", to: "pages#privacy_policy", as: :privacy_policy
   get "/cookies", to: "pages#cookies", as: :cookies
   get "/tta-service", to: "pages#tta_service", as: :tta_service

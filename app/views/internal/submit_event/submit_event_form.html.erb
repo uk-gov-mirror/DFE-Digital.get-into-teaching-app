@@ -1,0 +1,6 @@
+<%= govuk_form_for @submit_event, url: internal_submit_event_path, method: :post do |f| %>
+  <%= f.govuk_error_summary %>
+  <%= f.govuk_text_field :event_name, label: { text: 'Event name' } %>
+
+  <%= f.govuk_submit "Submit" %>
+<% end %>
