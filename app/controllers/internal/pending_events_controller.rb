@@ -12,7 +12,6 @@ module Internal
     def load_pending_events
       api = GetIntoTeachingApiClient::TeachingEventsApi.new
       search_results = api.search_teaching_events_grouped_by_type(
-        quantity_per_type: 3,
         start_after: DateTime.now.utc.beginning_of_day,
         )
       @group_presenter = Events::GroupPresenter.new(search_results)

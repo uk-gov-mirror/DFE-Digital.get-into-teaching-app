@@ -12,10 +12,10 @@
     <% end %>
   <% else %>
     <% @events_by_type.each do |type_id, events| %>
-      <%= render partial: "events/event_group",
+      <%= render "events/event_group",
                  type_id: type_id,
                  events: events,
-                 page_param_name: "ifhure",
+                 page_param_name: @performed_search ? @group_presenter.page_param_name(type_id) : nil,
                  show_see_all_events: true
       %>
     <% end %>

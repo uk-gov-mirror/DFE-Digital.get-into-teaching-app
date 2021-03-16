@@ -17,14 +17,25 @@ class SubmitEventForm
     true
   end
 
-  def get_buildings
-    buildings = GetIntoTeachingApiClient::TeachingEventBuildingsApi
-                  .new.get_teaching_event_buildings
-    obj = [
-      OpenStruct.new(id: 1, name: 'Add a new building'),
-      OpenStruct.new(id: nil, name: nil),
-      OpenStruct.new(id: 3, name: 'Finance'),
-    ]
-    obj
+  def get_building_options
+    options = [OpenStruct.new(id: 1, name: "", disabled: true)]
+
+    get_buildings.each do |building|
+      options.push(
+        OpenStruct.new(
+          id: building.id, name: "#{building.address_postcode}, #{building.venue}"
+        ),
+      )
+    end
+
+    options
   end
+
+  private
+
+  def get_buildings
+    GetIntoTeachingApiClient::TeachingEventBuildingsApi
+      .new.get_teaching_event_buildings
+  end
+
 end

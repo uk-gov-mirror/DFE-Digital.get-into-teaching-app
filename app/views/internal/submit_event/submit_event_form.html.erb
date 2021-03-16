@@ -1,15 +1,32 @@
 <%= govuk_form_for @submit_event, url: internal_submit_event_path, method: :post do |f| %>
+  <h1>
+    Provider Event Details
+  </h1>
+
   <%= f.govuk_error_summary %>
   <%= f.govuk_text_field :event_name, label: { text: 'Event name' } %>
+  <%= f.govuk_text_field :search_building_postcode,
+                         label: { text: 'Placeholder' },
+                         disabled: true,
+                         autocomplete: "off" %>
 
-  <%= f.govuk_text_field :search_building_postcode, label: { text: 'Search by postcode' } %>
+  <h1>
+    Event building
+  </h1>
+
+  <%= f.govuk_collection_select :building,
+                                @submit_event.get_building_options,
+                                :id,
+                                :name,
+                                label: { text: 'Search for existing buildings by postcode' } %>
 
 
+  <h2>Or add a new building</h2>
 
+  <div id="manual-building-input">
+    <%= f.govuk_text_field :building_name, label: { text: 'Building name' }%>
+  </div>
 
-  <%= f.govuk_collection_select :building, @submit_event.get_buildings, :id, :name %>
-
-  <%= f.govuk_text_field :building_name, label: { text: 'Building name' } %>
 
   <%= f.govuk_submit "Submit" %>
 <% end %>
