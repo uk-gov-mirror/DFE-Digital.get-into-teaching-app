@@ -2,5 +2,14 @@
   <%= f.govuk_error_summary %>
   <%= f.govuk_text_field :event_name, label: { text: 'Event name' } %>
 
+  <%= f.govuk_text_field :search_building_postcode, label: { text: 'Search by postcode' } %>
+
+
+
+
+  <%= f.govuk_collection_select :building, @submit_event.get_buildings, :id, :name %>
+
+  <%= f.govuk_text_field :building_name, label: { text: 'Building name' } %>
+
   <%= f.govuk_submit "Submit" %>
 <% end %>
