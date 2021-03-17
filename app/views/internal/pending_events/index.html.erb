@@ -1,24 +1,28 @@
 <div class="markdown">
-  <h1>Pending provider events</h1>
+  <h1 class="pending-title">Pending provider events</h1>
 
 
   <%= button_to "Submit a provider event for review",
                 "/internal/submit-event", method: :get,
-                class: "button" %>
+                class: "button submit-button" %>
 
   <% if @no_results %>
-    <%= render(Events::NoResultsComponent.new) do %>
-      No pending events for review
-    <% end %>
+    <div class="pending-no-results">
+      <%= render(Events::NoResultsComponent.new) do %>
+        No pending events for review
+      <% end %>
+    </div>
   <% else %>
-    <% @events_by_type.each do |type_id, events| %>
-      <%= render "events/event_group",
-                 type_id: type_id,
-                 events: events,
-                 page_param_name: @performed_search ? @group_presenter.page_param_name(type_id) : nil,
-                 show_see_all_events: true
-      %>
-    <% end %>
+    <div class="events container">
+      <section class="types-of-event">
+        <div class="events-featured">
+          <div class="events-featured__list">
+            <%= render partial: "event", collection: @events %>
+          </div>
+        </div>
+      </section>
+    </div>
+
   <% end %>
 
 

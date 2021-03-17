@@ -1,5 +1,6 @@
 module Internal
   class PendingEventsController < InternalController
+    before_action :load_type
 
     def index
       @no_results = true
@@ -9,14 +10,28 @@ module Internal
       render "index", layout: "internal"
     end
 
+    def individual_event
+      @minimal = true
+
+      @event = GetIntoTeachingApiClient::TeachingEventsApi.new.get_teaching_event(params[:id])
+      @page_title = @event.name
+
+      render "individual_event", layout: "internal"
+    end
+
+    private
+
+    def load_type
+      # TODO: Change to Pending type
+      GetIntoTeachingApiClient::PickListItem.new(id: 222750001, value: "Train to Teach event")
+    end
+
     def load_pending_events
-      api = GetIntoTeachingApiClient::TeachingEventsApi.new
-      search_results = api.search_teaching_events_grouped_by_type(
-        start_after: DateTime.now.utc.beginning_of_day,
-        )
-      @group_presenter = Events::GroupPresenter.new(search_results)
-      @events_by_type = @group_presenter.sorted_events_by_type
-      @no_results = @events_by_type.all? { |_, events| events.empty? }
+      # TODO: Change to Pending type
+      @event_search = Events::Search.new(type: 222750001)
+
+      @events = @event_search.query_events[0]&.teaching_events
+      @no_results = @events.blank?
     end
   end
 end

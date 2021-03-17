@@ -1,0 +1,10 @@
+<div>
+  <%= button_to "Edit this provider event",
+                "/internal/submit-event", method: :get,
+                class: "button admin-button" %>
+  <%= button_to "Submit this provider event",
+                "/internal/submit-event", method: :post,
+                class: "button admin-button" %>
+  <%= render "events/show" %>
+</div>
+
