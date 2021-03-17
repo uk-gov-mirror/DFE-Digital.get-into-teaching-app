@@ -1,7 +1,7 @@
 <div class="event-form">
-  <%= button_to "Back to pending events",
+  <%= link_to "Return to pending events",
                 "/internal/pending-events", method: :get,
-                class: "button admin-button" %>
+                class: "govuk-back-link" %>
   <%= govuk_form_for @submit_event, url: internal_submit_event_path, method: :post do |f| %>
     <h1>
       Provider Event Details
@@ -14,22 +14,41 @@
                            disabled: true,
                            autocomplete: "off" %>
 
-    <h1>
-      Event building
-    </h1>
+    <!--    <h1>-->
+    <!--      Event building-->
+    <!--    </h1>-->
 
-    <%= f.govuk_collection_select :building,
-                                  @submit_event.get_building_options,
-                                  :id,
-                                  :name,
-                                  label: { text: 'Search for existing buildings by postcode' } %>
+    <%= f.govuk_radio_buttons_fieldset(:building_fieldset, legend: { size: 'm', text: 'Event venue' }) do %>
+      <%= f.govuk_radio_button :building_fieldset, 'search', label: { text: 'Search existing venues' },
+                               link_errors: true do %>
+        <div id="search-building-input">
+          <%= f.govuk_collection_select :building,
+                                        @submit_event.get_building_options,
+                                        :id,
+                                        :name,
+                                        label: { text: 'Search for existing buildings by postcode' } %>
+        </div>
+
+      <% end %>
+      <%= f.govuk_radio_divider %>
+      <%= f.govuk_radio_button :building_fieldset, 'manual', label: { text: 'Add a new venue' } do %>
+        <div id="manual-building-input">
+          <%= f.govuk_text_field :venue, label: { text: 'Venue' }, id: "venue" %>
+          <%= f.govuk_text_field :address_line_1, label: { text: 'Address line 1' } %>
+          <%= f.govuk_text_field :address_line_2, label: { text: 'Address line 2' } %>
+          <%= f.govuk_text_field :address_line_3, label: { text: 'Address line 3' } %>
+          <%= f.govuk_text_field :address_postcode, label: { text: 'Postcode' } %>
+        </div>
+      <% end %>
+    <% end %>
+
+
+
 
 
     <h2>Or add a new building</h2>
 
-    <div id="manual-building-input">
-      <%= f.govuk_text_field :building_name, label: { text: 'Building name' } %>
-    </div>
+
 
 
     <%= f.govuk_submit "Submit fror review" %>

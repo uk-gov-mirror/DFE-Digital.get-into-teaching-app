@@ -1,4 +1,7 @@
 <div>
+  <%= link_to "Return to pending events",
+              "/internal/pending-events", method: :get,
+              class: "govuk-back-link" %>
   <%= button_to "Edit this provider event",
                 "/internal/submit-event", method: :post,
                 params: {
