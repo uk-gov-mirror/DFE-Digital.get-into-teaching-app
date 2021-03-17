@@ -1,17 +1,20 @@
 class SubmitEventForm
   include ActiveModel::Model
 
+  attr_accessor :edit
+
   attr_accessor :event_name
   attr_accessor :building
   attr_accessor :building_name
   attr_accessor :search_building_postcode
 
-  validates :event_name, format: { with: /\A[a-zA-Z]+\z/,
-                                   message: "only allows letters" }
+  validates :event_name, presence: true, allow_blank: false
 
   def submit
+    return false if edit
     puts "invalid" if invalid?
     return false if invalid?
+
 
     # submit via API
     true

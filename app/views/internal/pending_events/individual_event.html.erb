@@ -1,6 +1,13 @@
 <div>
   <%= button_to "Edit this provider event",
-                "/internal/submit-event", method: :get,
+                "/internal/submit-event", method: :post,
+                params: {
+                  # edit: true,
+                  submit_event_form: {
+                    edit: true,
+                    event_name: @event.name
+                  },
+                },
                 class: "button admin-button" %>
   <%= button_to "Submit this provider event",
                 "/internal/submit-event", method: :post,

@@ -20,7 +20,7 @@ module Internal
   private
 
     def event_params
-      params.require(:submit_event_form).permit(:event_name)
+      params.require(:submit_event_form).permit(:event_name, :edit)
     end
   end
 end

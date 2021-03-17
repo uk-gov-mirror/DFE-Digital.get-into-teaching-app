@@ -1,4 +1,7 @@
 <div class="event-form">
+  <%= button_to "Back to pending events",
+                "/internal/pending-events", method: :get,
+                class: "button admin-button" %>
   <%= govuk_form_for @submit_event, url: internal_submit_event_path, method: :post do |f| %>
     <h1>
       Provider Event Details
@@ -29,6 +32,6 @@
     </div>
 
 
-    <%= f.govuk_submit "Submit" %>
+    <%= f.govuk_submit "Submit fror review" %>
   <% end %>
 </div>
