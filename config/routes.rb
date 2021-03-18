@@ -18,10 +18,9 @@ Rails.application.routes.draw do
     get "/assets/*missing", to: "errors#not_found", via: :all
   end
 
-  get "/internal/pending-events", to: "internal/pending_events#index", as: nil
-  get "/internal/pending-event", to: "internal/pending_events#individual_event"
-  get "/internal/submit-event", to: "internal/submit_event#new", as: nil
-  post "/internal/submit-event", to: "internal/submit_event#create"
+  namespace :internal do
+    resources :provider_events, only: [:index, :show, :new, :create, :edit]
+  end
 
   get "/privacy-policy", to: "pages#privacy_policy", as: :privacy_policy
   get "/cookies", to: "pages#cookies", as: :cookies

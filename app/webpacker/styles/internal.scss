@@ -4,6 +4,7 @@
 
 .submit-button {
   width: 500px;
+  margin-left: 0;
 }
 
 .event-form {
@@ -18,4 +19,15 @@
 .admin-button {
   margin: 1.5em;
   width: 300px;
+  background-color: white;
+  color: black;
+
+  &:hover {
+    background-color: #FEBBDE;
+    color: black;
+  }
+}
+
+.admin-controls {
+  display: flex;
 }

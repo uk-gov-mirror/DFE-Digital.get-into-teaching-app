@@ -1,29 +1,23 @@
 <div class="event-form">
   <%= link_to "Return to pending events",
-                "/internal/pending-events", method: :get,
-                class: "govuk-back-link" %>
-  <%= govuk_form_for @submit_event, url: internal_submit_event_path, method: :post do |f| %>
+              internal_provider_events_path, method: :get,
+              class: "govuk-back-link" %>
+  <%= govuk_form_for @provider_event do |f| %>
     <h1>
       Provider Event Details
     </h1>
 
     <%= f.govuk_error_summary %>
     <%= f.govuk_text_field :event_name, label: { text: 'Event name' } %>
-    <%= f.govuk_text_field :search_building_postcode,
-                           label: { text: 'Placeholder' },
-                           disabled: true,
-                           autocomplete: "off" %>
-
-    <!--    <h1>-->
-    <!--      Event building-->
-    <!--    </h1>-->
+    <%= f.govuk_text_area :event_summary, label: { text: 'Event summary' } %>
+    <%= f.govuk_text_area :event_description, label: { text: 'Event description' } %>
 
     <%= f.govuk_radio_buttons_fieldset(:building_fieldset, legend: { size: 'm', text: 'Event venue' }) do %>
       <%= f.govuk_radio_button :building_fieldset, 'search', label: { text: 'Search existing venues' },
                                link_errors: true do %>
         <div id="search-building-input">
           <%= f.govuk_collection_select :building,
-                                        @submit_event.get_building_options,
+                                        @provider_event.get_building_options,
                                         :id,
                                         :name,
                                         label: { text: 'Search for existing buildings by postcode' } %>
@@ -41,16 +35,6 @@
         </div>
       <% end %>
     <% end %>
-
-
-
-
-
-    <h2>Or add a new building</h2>
-
-
-
-
-    <%= f.govuk_submit "Submit fror review" %>
+    <%= f.button "Submit for review", class: "call-to-action-button button" %>
   <% end %>
 </div>
