@@ -1,6 +1,6 @@
 <div>
   <%= link_to "Return to pending events",
-              internal_provider_events_path, method: :get,
+              internal_events_path, method: :get,
               class: "govuk-back-link" %>
   <div class="govuk-panel govuk-panel--confirmation">
     <h1 class="govuk-panel__title">
@@ -8,7 +8,7 @@
     </h1>
     <div class="govuk-panel__body">
       <%= button_to "Edit this provider event",
-                    edit_internal_provider_event_path(@event.readable_id), method: :get,
+                    edit_internal_event_path(@event.readable_id), method: :get,
 
                     class: "button admin-button" %>
       <%= button_to "Submit this provider event",

@@ -19,7 +19,7 @@ Rails.application.routes.draw do
   end
 
   namespace :internal do
-    resources :provider_events, only: [:index, :show, :new, :create, :edit]
+    resources :events, only: %i[index show new create edit update]
   end
 
   get "/privacy-policy", to: "pages#privacy_policy", as: :privacy_policy
