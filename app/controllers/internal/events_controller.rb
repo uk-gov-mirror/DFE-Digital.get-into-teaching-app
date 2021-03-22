@@ -74,7 +74,9 @@ module Internal
         .new.get_teaching_event_buildings
     end
 
-
+    # def is_online_options
+    #   @is_online =
+    # end
 
     # def load_type
     #   # TODO: Change to Pending type
@@ -92,6 +94,7 @@ module Internal
       @event_search = Events::Search.new(type: GetIntoTeachingApiClient::Constants::EVENT_TYPES["School or University event"])
 
       @events = @event_search.query_events[0]&.teaching_events
+      @events = Kaminari.paginate_array(@events).page(params[:page])
       @no_results = @events.blank?
     end
   end

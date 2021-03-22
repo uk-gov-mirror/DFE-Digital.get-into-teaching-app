@@ -1,4 +1,8 @@
-@import "node_modules/govuk-frontend/govuk/all";
+@import "~govuk-frontend/govuk/all";
+
+.red {
+  border: red solid 1px;
+}
 
 .pending-title {
   padding-top: 30px;
