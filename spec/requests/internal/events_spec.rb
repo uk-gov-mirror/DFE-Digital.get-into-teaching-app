@@ -1,13 +1,24 @@
 require "rails_helper"
 
 RSpec.describe Internal::InternalController do
+
+  let(:git_api_endpoint) { ENV["GIT_API_ENDPOINT"] }
+  before do
+
+    stub_request(:get, /#{git_api_endpoint}.*/)
+      .to_return \
+        status: 200,
+        headers: { "Content-type" => "application/json" },
+        body: ""
+  end
+
   it "should reject unauthenticated users" do
     authorization = ActionController::HttpAuthentication::Basic.encode_credentials(
       "wrong",
       "wrong",
-    )
+      )
 
-    get "/internal/submit-event", headers: { "HTTP_AUTHORIZATION" => authorization }
+    get internal_events_path, headers: { "HTTP_AUTHORIZATION" => authorization }
 
     assert_response 401
   end
@@ -16,9 +27,9 @@ RSpec.describe Internal::InternalController do
     authorization = ActionController::HttpAuthentication::Basic.encode_credentials(
       "publisher",
       "password",
-    )
+      )
 
-    get "/internal/submit-event", headers: { "HTTP_AUTHORIZATION" => authorization }
+    get internal_events_path, headers: { "HTTP_AUTHORIZATION" => authorization }
 
     assert_response 200
     expect(session[:publisher]).to be(true)
@@ -30,7 +41,7 @@ RSpec.describe Internal::InternalController do
       "password",
       )
 
-    get "/internal/submit-event", headers: { "HTTP_AUTHORIZATION" => authorization }
+    get internal_events_path, headers: { "HTTP_AUTHORIZATION" => authorization }
 
     assert_response 200
     expect(session[:author]).to be(true)

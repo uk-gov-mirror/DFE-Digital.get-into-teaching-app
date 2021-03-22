@@ -15,19 +15,18 @@
     <%= f.govuk_text_area :summary, label: { text: 'Event summary' } %>
     <%= f.govuk_text_area :description, label: { text: 'Event description' } %>
 
-    <%= f.govuk_text_field :name, label: { text: 'Event name' } %>
-    <%= f.govuk_text_field :name, label: { text: 'Event name' } %>
-    <%= f.govuk_text_field :name, label: { text: 'Event name' } %>
-    <%= f.govuk_text_field :name, label: { text: 'Event name' } %>
+    <%= f.govuk_email_field :provider_contact_email, label: { text: 'Provider email address' } %>
+    <%= f.govuk_text_field :provider_organiser, label: { text: 'Provider organiser' } %>
+    <%= f.govuk_text_field :provider_target_audience, label: { text: 'Target audience' } %>
+    <%= f.govuk_text_field :provider_website_url, label: { text: 'Provider website/registration link' } %>
 
-    <trix-editor input="x">
-
-      <%= f.govuk_text_field :name, label: { text: 'Event name' } %>
-    </trix-editor>
+    <label for="internal_event[description]" class="govuk-label">Event Description</label>
+    <%= f.hidden_field :description, class: "event-description" %>
+    <trix-editor class="govuk-form-group govuk-input event-description" input="internal_event_description"></trix-editor>
 
     <%= f.fields_for :building, @event.building do |b| %>
       <%= b.hidden_field :id %>
-      <%= b.govuk_radio_buttons_fieldset(:fieldset, legend: { size: 'm', text: 'Select a build or input one' }) do %>
+      <%= b.govuk_radio_buttons_fieldset(:fieldset, legend: { size: 'm', text: 'Event venue' }) do %>
         <%= b.govuk_radio_button :fieldset, 'select', label: { text: 'Search existing venues' } do %>
           <%= b.govuk_collection_select :id,
                                         @buildings,

@@ -1,5 +1,6 @@
 import { initAll } from 'govuk-frontend';
 import { enhanceSelectElement } from 'accessible-autocomplete';
+import 'trix';
 
 initAll();
 
@@ -13,6 +14,3 @@ enhanceSelectElement({
   selectElement: document.querySelector(selectId),
   placeholder: 'E.g., M1 7JA',
 });
-
-require("trix")
-require("@rails/actiontext")
