@@ -15,7 +15,9 @@
 
   <label for="internal_event[description]" class="govuk-label">Event Description</label>
   <%= f.hidden_field :description, class: "event-description" %>
-  <trix-editor class="govuk-form-group govuk-input event-description" input="internal_event_description"></trix-editor>
+
+  <trix-editor class="govuk-form-group govuk-input event-description" input="internal_event_description">
+  </trix-editor>
 
   <%= f.govuk_email_field :provider_contact_email, label: { text: 'Provider email address' } %>
   <%= f.govuk_text_field :provider_organiser, label: { text: 'Provider organiser' } %>
@@ -29,41 +31,34 @@
   <% end %>
 
   <h3 class="govuk-label">Start at</h3>
-  <%#= f.govuk_date_field :start_at, legend: { text: "" } %>
-  <div class="time">
-
-  </div>
-  <%= f.datetime_field :start_at %>
+  <%= f.datetime_field :start_at, class: "govuk-input datetime" %>
 
   <h3 class="govuk-label">End at</h3>
-  <%#= f.govuk_date_field :end_at, legend: { text: "" } %>
-  <div class="time">
+  <%= f.datetime_field :end_at, class: "govuk-input datetime" %>
 
-  </div>
-  <%= f.datetime_field :end_at %>
-
-  <%= f.fields_for :building, @event.building do |b| %>
-    <%= b.hidden_field :id %>
-    <%= b.govuk_radio_buttons_fieldset(:fieldset, legend: { size: 'm', text: 'Event venue' }) do %>
-      <%= b.govuk_radio_button :fieldset, 'select', label: { text: 'Search existing venues' } do %>
-        <%= b.govuk_collection_select :id,
-                                      @buildings,
-                                      :id,
-                                      ->(building) { "#{building.venue}, #{building.address_postcode}" },
-                                      label: { text: 'Search for existing buildings' },
-                                      options: { include_blank: "" } %>
-      <% end %>
-      <%= b.govuk_radio_divider %>
-      <%= b.govuk_radio_button :fieldset, 'manual', label: { text: 'Add a new venue' } do %>
-        <%= b.govuk_text_field :venue, label: { text: 'Venue' } %>
-        <%= b.govuk_text_field :address_line_1, label: { text: 'Address line 1' } %>
-        <%= b.govuk_text_field :address_line_2, label: { text: 'Address line 2' } %>
-        <%= b.govuk_text_field :address_line_3, label: { text: 'Address line 3' } %>
-        <%= b.govuk_text_field :address_postcode, label: { text: 'Postcode' } %>
+  <div class="event-venue">
+    <%= f.fields_for :building, @event.building do |b| %>
+      <%= b.hidden_field :id %>
+      <%= b.govuk_radio_buttons_fieldset(:fieldset, legend: { size: 'm', text: 'Event venue' }) do %>
+        <%= b.govuk_radio_button :fieldset, 'select', label: { text: 'Search existing venues' } do %>
+          <%= b.govuk_collection_select :id,
+                                        @buildings,
+                                        :id,
+                                        ->(building) { "#{building.venue}, #{building.address_postcode}" },
+                                        label: { text: 'Search for existing buildings' },
+                                        options: { include_blank: "" } %>
+        <% end %>
+        <%= b.govuk_radio_divider %>
+        <%= b.govuk_radio_button :fieldset, 'manual', label: { text: 'Add a new venue' } do %>
+          <%= b.govuk_text_field :venue, label: { text: 'Venue' } %>
+          <%= b.govuk_text_field :address_line_1, label: { text: 'Address line 1' } %>
+          <%= b.govuk_text_field :address_line_2, label: { text: 'Address line 2' } %>
+          <%= b.govuk_text_field :address_line_3, label: { text: 'Address line 3' } %>
+          <%= b.govuk_text_field :address_postcode, label: { text: 'Postcode' } %>
+        <% end %>
       <% end %>
     <% end %>
-  <% end %>
-
+  </div>
   <%= f.button "Submit for review", class: "call-to-action-button button" %>
 
 <% end %>

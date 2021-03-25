@@ -2,10 +2,6 @@ module Internal
   class Event
     include ActiveModel::Model
     include ActiveModel::Attributes
-    # multi parameter date fields aren't yet support by ActiveModel so we
-    # need to include the support for them from ActiveRecord
-    require "active_record/attribute_assignment"
-    include ::ActiveRecord::AttributeAssignment
 
     attribute :id, :string
     attribute :readable_id, :string
@@ -30,7 +26,7 @@ module Internal
     validates :description, presence: true, allow_blank: false
     validates :summary, presence: true, allow_blank: false
     validates :is_online, inclusion: { in: [true, false] }
-    validates :start_at, presence: true
+    validates :start_at, presence: true, allow_blank: false
     validates :end_at, presence: true
     validates :provider_contact_email,
               presence: true,
@@ -40,7 +36,7 @@ module Internal
     validates :provider_organiser, presence: true, allow_blank: false
     validates :provider_target_audience, presence: true, allow_blank: false
     validates :provider_website_url, presence: true, allow_blank: false
-    # validate :end_after_start, :time_must_be_future
+    validate :end_after_start, :time_must_be_future
 
     def persisted?
       id.present?
