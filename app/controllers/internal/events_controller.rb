@@ -1,25 +1,22 @@
 module Internal
   class EventsController < ::InternalController
-    before_action :load_buildings, only: %i[new edit]
+    before_action :load_buildings, only: %i[new edit create]
     layout "internal"
 
     def index
       @no_results = true
-      @minimal = true
       load_pending_events
     end
 
     def show
-      @minimal = true
-
       @event = GetIntoTeachingApiClient::TeachingEventsApi.new.get_teaching_event(params[:id])
       @page_title = @event.name
-
     end
 
     def new
-      @minimal = true
       @event = Event.new
+      @event.building = EventBuilding.new
+      @event.building.fieldset = "select"
     end
 
     def create
@@ -27,73 +24,57 @@ module Internal
       if @event.submit
         # successfully submitted
       else
-        @minimal = true
         render action: :new
       end
       # respond_with @success, location: some_success_path
     end
 
     def edit
-      @minimal = true
       @event = GetIntoTeachingApiClient::TeachingEventsApi.new.get_teaching_event(params[:id])
       hash = @event.to_hash.transform_keys { |k| k.to_s.underscore }.filter { |k| Event.attribute_names.include?(k) }
       @event = Event.new(hash)
       hash = hash["building"].transform_keys { |k| k.to_s.underscore }.filter { |k| EventBuilding.attribute_names.include?(k) }
       @event.building = EventBuilding.new(hash)
-
-
-      # @provider_event = ProviderEvent
-      # Get event -
+      @event.building.fieldset = "select"
       render "new"
     end
 
-    def update; end
+    def update
+      create
+    end
 
     private
 
-
-    # def get_building_options
-    #   options = [OpenStruct.new(id: 1, name: "", disabled: true)]
-    #
-    #   get_buildings.each do |building|
-    #     options.push(
-    #       OpenStruct.new(
-    #         id: building.id,
-    #         name: "#{building.address_postcode}, "\
-    #               "#{building.venue}",
-    #       ),
-    #     )
-    #   end
-    #
-    #   options
-    # end
-
-
     def load_buildings
       @buildings = GetIntoTeachingApiClient::TeachingEventBuildingsApi
-        .new.get_teaching_event_buildings
+                     .new.get_teaching_event_buildings
     end
 
-    # def is_online_options
-    #   @is_online =
-    # end
-
-    # def load_type
-    #   # TODO: Change to Pending type
-    #
-    #   GetIntoTeachingApiClient::PickListItem.new(id: 222750001, value: "Train to Teach event")
-    # end
-
-
     def event_params
-      params.require(:internal_provider_event).permit(:event_name, :event_description, :event_summary, :edit)
+      params.require(:internal_event).permit(
+        :id,
+        :name,
+        :summary,
+        :description,
+        :is_online,
+        :start_at,
+        :end_at,
+        :provider_contact_email,
+        :provider_organiser,
+        :provider_target_audience,
+        :provider_website_url,
+        :building,
+      )
     end
 
     def load_pending_events
-      # TODO: Change to Pending type
-      @event_search = Events::Search.new(type: GetIntoTeachingApiClient::Constants::EVENT_TYPES["School or University event"])
+      @event_search = Events::Search.new(
+        type: GetIntoTeachingApiClient::Constants::EVENT_TYPES["School or University event"])
 
       @events = @event_search.query_events[0]&.teaching_events
+      @events = @events.select do |event|
+        event.status_id == GetIntoTeachingApiClient::Constants::EVENT_STATUS["Open"]
+      end
       @events = Kaminari.paginate_array(@events).page(params[:page])
       @no_results = @events.blank?
     end

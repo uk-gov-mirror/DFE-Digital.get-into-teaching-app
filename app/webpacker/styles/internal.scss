@@ -6,46 +6,21 @@
   overflow: auto;
 }
 
-.pending-button-container {
-  width: auto;
-  display: flex;
-  justify-content: space-between;
-}
-
-.red {
-  border: red solid 1px;
+.notification-button {
+  margin: 0 30px 30px 0;
 }
 
 .pending-title {
   padding-top: 30px;
 }
 
-.submit-button {
-  width: 500px;
-  margin-left: 0;
-}
-
-.event-form {
-  margin: 1.5em;
-  width: 80%;
-}
-
 .pending-no-results {
   margin: 3em;
 }
 
-.admin-button {
-  margin: 1.5em;
-  width: 300px;
-  background-color: white;
-  color: black;
-
-  &:hover {
-    background-color: #FEBBDE;
-    color: black;
-  }
-}
-
-.admin-controls {
+.time {
   display: flex;
+  margin-bottom: 30px;
+  width: 280px;
+  margin-left: -1.5rem;
 }

@@ -20,7 +20,7 @@ private
   def authenticate
     authenticated = true
     authenticate_or_request_with_http_basic do |username, password|
-      if username == ENV["PUBLISHER_USERNAME"] && password == ENV["PUBLISHER_PASSWORD"]
+      if username == "publisher" && password == "password"
         set_account_role(:publisher)
       elsif username == "author" && password == "password"
         set_account_role(:author)

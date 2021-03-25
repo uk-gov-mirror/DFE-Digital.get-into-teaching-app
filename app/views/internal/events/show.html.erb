@@ -11,14 +11,12 @@
     <div class="govuk-notification-banner__content">
       <p class="govuk-notification-banner__heading">
         This is a pending event.
-        <div class="pending-button-container">
           <%= button_to "Edit this provider event",
                         edit_internal_event_path(@event.readable_id), method: :get,
-                        class: "button" %>
+                        class: "button notification-button" %>
           <%= button_to "Submit this provider event",
                         "/internal/submit-event", method: :post,
-                        class: "button" %>
-        </div>
+                        class: "button notification-button" %>
       </p>
     </div>
 
