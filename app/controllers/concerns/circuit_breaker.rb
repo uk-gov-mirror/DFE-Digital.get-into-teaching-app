@@ -9,7 +9,8 @@ module CircuitBreaker
 
 protected
 
-  def redirect_to_not_available
+  def redirect_to_not_available(circuit_broken_exception)
+    Sentry.capture_exception circuit_broken_exception
     redirect_to(not_available_path)
   end
 
