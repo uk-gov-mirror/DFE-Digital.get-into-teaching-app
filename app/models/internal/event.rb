@@ -3,8 +3,9 @@ module Internal
     include ActiveModel::Model
     include ActiveModel::Attributes
 
-    attribute :id, :string
+    attribute :id, :string, default: nil
     attribute :readable_id, :string
+    attribute :status_id, :integer
     attribute :name, :string
     attribute :summary, :string
     attribute :description, :string
@@ -22,6 +23,7 @@ module Internal
     attribute :building
 
     validates :name, presence: true, allow_blank: false
+    validates :readable_id, presence: true, allow_blank: false
     validates :summary, presence: true, allow_blank: false
     validates :description, presence: true, allow_blank: false
     validates :summary, presence: true, allow_blank: false
@@ -36,68 +38,77 @@ module Internal
     validates :provider_organiser, presence: true, allow_blank: false
     validates :provider_target_audience, presence: true, allow_blank: false
     validates :provider_website_url, presence: true, allow_blank: false
-    validate :end_after_start, :time_must_be_future
+    validates_each :start_at, :end_at do |record, attr, value|
+      unless value.nil?
+        record.errors.add attr, "Must be in the future" if value <= Time.zone.now
+      end
+    end
+    validate :end_after_start
 
     def persisted?
       id.present?
     end
 
-    def submit
-      return false if invalid?
+    def submit_pending
+      self.status_id = GetIntoTeachingApiClient::Constants::EVENT_STATUS["Pending"]
+      submit
+    end
 
-      submit_to_api
-      true
+    def approve
+      self.status_id = GetIntoTeachingApiClient::Constants::EVENT_STATUS["Open"]
+      submit
     end
 
     private
 
+    def submit
+      return false if invalid?
+
+      submit_to_api?
+    end
+
     def end_after_start
       return if end_at.blank? || start_at.blank?
 
-      if end_at <= start_at
+      if end_at.floor <= start_at.floor
         errors.add(:end_at, "must be after the start date")
       end
     end
 
-    def time_must_be_future
-      return if start_at.blank?
-      if start_at <= Time.zone.now
-        errors.add(:start_at, "must be later than current time")
-      end
-
-      if end_at <= Time.zone.now
-        errors.add(:end_at, "must be later than current time")
-      end
-    end
-
-    def submit_to_api
-      api = GetIntoTeachingApiClient::TeachingEventsApi.new
-
+    def submit_to_api?
       opts = {
         body: GetIntoTeachingApiClient::TeachingEvent.new(
+          id: id.presence,
           name: name,
-          readableId: name,
+          readableId: readable_id,
           typeId: GetIntoTeachingApiClient::Constants::EVENT_TYPES["School or University event"],
-          statusId: GetIntoTeachingApiClient::Constants::EVENT_STATUS["Pending"],
+          statusId: status_id,
           summary: summary,
           description: description,
           isOnline: is_online,
           startAt: start_at,
-          endAt: end_at) }
-      result = api.upsert_teaching_event(opts)
-      p result
+          endAt: end_at,
+          providerContactEmail: provider_contact_email,
+          providerOrganiser: provider_organiser,
+          providerTargetAudience: provider_target_audience,
+          providerWebsiteUrl: provider_website_url,
+          building: building) }
 
-      # start_date: format_start_date,
-      # postcode: postcode&.strip,
-      # start_after: start_of_month,
-      # start_before: end_of_month,
-      # quantity_per_type: limit,
+      begin
+        GetIntoTeachingApiClient::TeachingEventsApi.new.upsert_teaching_event(opts)
 
+        return true
+      rescue GetIntoTeachingApiClient::ApiError => error
+        map_errors_to_fields(error) if error.code == 400
+        return false
+      end
     end
 
-    # def format_date
-    #   helpers.format_date
-    # end
+    def map_errors_to_fields(error)
+      JSON.parse(error.response_body)["errors"].each do |key, value|
+        errors.add(key.underscore.to_sym, value[0])
+      end
+    end
   end
 end
 

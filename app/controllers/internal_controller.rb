@@ -1,14 +1,11 @@
 class InternalController < ApplicationController
   before_action :authenticate
+  helper_method :publisher?
 
 protected
 
   def publisher?
     session[:publisher]
-  end
-
-  def author?
-    session[:author]
   end
 
 private
