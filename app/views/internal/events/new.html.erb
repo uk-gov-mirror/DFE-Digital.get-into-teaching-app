@@ -61,8 +61,14 @@
   <div class="no-left-margin">
     <%= f.fields_for :building, @event.building do |b| %>
       <%= b.hidden_field :id %>
+      <%= b.hidden_field :venue %>
+      <%= b.hidden_field :address_line_1 %>
+      <%= b.hidden_field :address_line_2 %>
+      <%= b.hidden_field :address_line_3 %>
+      <%= b.hidden_field :address_city %>
+      <%= b.hidden_field :address_postcode %>
       <%= b.govuk_radio_buttons_fieldset(:fieldset, legend: { size: 'm', text: 'Event venue' }) do %>
-        <%= b.govuk_radio_button :fieldset, 'select', label: { text: 'Search existing venues' } do %>
+        <%= b.govuk_radio_button :fieldset, 'existing', label: { text: 'Search existing venues' } do %>
           <%= b.govuk_collection_select :id,
                                         @buildings,
                                         :id,
@@ -71,11 +77,12 @@
                                         options: { include_blank: "" } %>
         <% end %>
         <%= b.govuk_radio_divider %>
-        <%= b.govuk_radio_button :fieldset, 'manual', label: { text: 'Add a new venue' } do %>
+        <%= b.govuk_radio_button :fieldset, 'add', label: { text: 'Add a new venue' } do %>
           <%= b.govuk_text_field :venue, label: { text: 'Venue' } %>
           <%= b.govuk_text_field :address_line_1, label: { text: 'Address line 1' } %>
           <%= b.govuk_text_field :address_line_2, label: { text: 'Address line 2' } %>
           <%= b.govuk_text_field :address_line_3, label: { text: 'Address line 3' } %>
+          <%= b.govuk_text_field :address_city, label: { text: 'City' } %>
           <%= b.govuk_text_field :address_postcode, label: { text: 'Postcode' } %>
         <% end %>
       <% end %>

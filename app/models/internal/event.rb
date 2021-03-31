@@ -76,26 +76,32 @@ module Internal
     end
 
     def submit_to_api?
-      opts = {
-        body: GetIntoTeachingApiClient::TeachingEvent.new(
-          id: id.presence,
-          name: name,
-          readableId: readable_id,
-          typeId: GetIntoTeachingApiClient::Constants::EVENT_TYPES["School or University event"],
-          statusId: status_id,
-          summary: summary,
-          description: description,
-          isOnline: is_online,
-          startAt: start_at,
-          endAt: end_at,
-          providerContactEmail: provider_contact_email,
-          providerOrganiser: provider_organiser,
-          providerTargetAudience: provider_target_audience,
-          providerWebsiteUrl: provider_website_url,
-          building: building) }
+      body = GetIntoTeachingApiClient::TeachingEvent.new(
+        id: id.presence,
+        name: name,
+        readableId: readable_id,
+        typeId: GetIntoTeachingApiClient::Constants::EVENT_TYPES["School or University event"],
+        statusId: status_id,
+        summary: summary,
+        description: description,
+        isOnline: is_online,
+        startAt: start_at,
+        endAt: end_at,
+        providerContactEmail: provider_contact_email,
+        providerOrganiser: provider_organiser,
+        providerTargetAudience: provider_target_audience,
+        providerWebsiteUrl: provider_website_url,
+        building: { venue: building.venue.presence,
+                    addressLine1: building.address_line_1.presence,
+                    addressLine2: building.address_line_2.presence,
+                    addressLine3: building.address_line_3.presence,
+                    addressCity: building.address_city.presence,
+                    addressPostcode: building.address_postcode.presence,
+                    id: building.id.presence },
+      )
 
       begin
-        GetIntoTeachingApiClient::TeachingEventsApi.new.upsert_teaching_event(opts)
+        GetIntoTeachingApiClient::TeachingEventsApi.new.upsert_teaching_event(body)
 
         return true
       rescue GetIntoTeachingApiClient::ApiError => error

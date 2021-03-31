@@ -10,6 +10,7 @@ module Internal
     attribute :address_line_1, :string
     attribute :address_line_2, :string
     attribute :address_line_3, :string
+    attribute :address_city, :string
     attribute :address_postcode, :string
 
     validates :event, presence: true, allow_blank: false
