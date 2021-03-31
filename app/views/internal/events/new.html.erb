@@ -61,12 +61,6 @@
   <div class="no-left-margin">
     <%= f.fields_for :building, @event.building do |b| %>
       <%= b.hidden_field :id %>
-      <%= b.hidden_field :venue %>
-      <%= b.hidden_field :address_line_1 %>
-      <%= b.hidden_field :address_line_2 %>
-      <%= b.hidden_field :address_line_3 %>
-      <%= b.hidden_field :address_city %>
-      <%= b.hidden_field :address_postcode %>
       <%= b.govuk_radio_buttons_fieldset(:fieldset, legend: { size: 'm', text: 'Event venue' }) do %>
         <%= b.govuk_radio_button :fieldset, 'existing', label: { text: 'Search existing venues' } do %>
           <%= b.govuk_collection_select :id,
