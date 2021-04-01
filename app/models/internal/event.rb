@@ -9,17 +9,13 @@ module Internal
     attribute :name, :string
     attribute :summary, :string
     attribute :description, :string
-
     attribute :is_online, :boolean
-
     attribute :start_at, :datetime
     attribute :end_at, :datetime
-
     attribute :provider_contact_email, :string
     attribute :provider_organiser, :string
     attribute :provider_target_audience, :string
     attribute :provider_website_url, :string
-
     attribute :building
 
     validates :name, presence: true, allow_blank: false
@@ -103,10 +99,10 @@ module Internal
       begin
         GetIntoTeachingApiClient::TeachingEventsApi.new.upsert_teaching_event(body)
 
-        return true
-      rescue GetIntoTeachingApiClient::ApiError => error
-        map_errors_to_fields(error) if error.code == 400
-        return false
+        true
+      rescue GetIntoTeachingApiClient::ApiError => e
+        map_errors_to_fields(e) if e.code == 400
+        false
       end
     end
 

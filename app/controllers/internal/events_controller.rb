@@ -18,14 +18,13 @@ module Internal
     def new
       @event = Event.new
       @event.building = EventBuilding.new
-      @event.building.fieldset = "select"
+      @event.building.fieldset = "existing"
     end
 
     def final_submit
       # TODO: fix
       @event = GetIntoTeachingApiClient::TeachingEventsApi.new.get_teaching_event(params[:format])
       transform_event(@event)
-      # @event.building = format_building(event_params["building"])
       @event.start_at = Time.zone.parse(@event.start_at.to_s)
       @event.end_at = Time.zone.parse(@event.end_at.to_s)
       if @event.approve
@@ -33,6 +32,7 @@ module Internal
       else
         render action: :new
       end
+      # Ensure final submit has building attached
     end
 
     def create
@@ -48,6 +48,7 @@ module Internal
     def edit
       @event = GetIntoTeachingApiClient::TeachingEventsApi.new.get_teaching_event(params[:id])
       transform_event(@event)
+      @event.building.fieldset = "existing"
       render "new"
     end
 
@@ -61,9 +62,10 @@ module Internal
       if building_params[:fieldset] == "existing"
         building = @buildings.select { |building| building.id == building_params[:id] }
         transform_event_building(building.first.to_hash)
-      elsif building_params.fieldset == "add"
-      else
-
+      elsif building_params[:fieldset] == "add"
+        building = transform_event_building(building_params.to_hash)
+        building.id = nil # Id may be present from previous event
+        building
       end
     end
 
