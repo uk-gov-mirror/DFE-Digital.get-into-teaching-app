@@ -37,9 +37,9 @@ module Internal
 
     def create
       @event = Event.new(event_params)
-      @event.building = format_building(event_params["building"])
+      @event.building = EventBuilding.new(event_params["building"])
       if @event.submit_pending
-        redirect_to internal_events_path(method: :get, success: :pending)
+        redirect_to internal_events_path(success: :pending)
       else
         render action: :new
       end
@@ -59,29 +59,33 @@ module Internal
     private
 
     def format_building(building_params)
-      if building_params[:fieldset] == "existing"
-        building = @buildings.select { |building| building.id == building_params[:id] }
-        transform_event_building(building.first.to_hash)
-      elsif building_params[:fieldset] == "add"
-        building = transform_event_building(building_params.to_hash)
-        building.id = nil # Id may be present from previous event
-        building
+      case building_params[:fieldset]
+      when "existing"
+        building = @buildings.select { |b| b.id == building_params[:id] }
+        building.first.to_hash
+      when "add"
+        building = building_params.to_hash
+        building.id = nil # Id may be present from previous selection
+      else
+        building = nil
       end
+      building
     end
 
     def transform_event(event)
       hash = event.to_hash.transform_keys { |k| k.to_s.underscore }.filter { |k| Event.attribute_names.include?(k) }
       @event = Event.new(hash)
-      if event.building.nil?
-        @event.building = EventBuilding.new
-      else
-        transform_event_building(hash["building"])
-      end
+      @event.building =
+        if event.building.nil?
+          EventBuilding.new
+        else
+          transform_event_building(hash["building"])
+        end
     end
 
     def transform_event_building(building)
       hash = building.transform_keys { |k| k.to_s.underscore }.filter { |k| EventBuilding.attribute_names.include?(k) }
-      @event.building = EventBuilding.new(hash)
+      EventBuilding.new(hash)
     end
 
     def load_buildings

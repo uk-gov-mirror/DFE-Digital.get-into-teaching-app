@@ -7,9 +7,9 @@ module Internal
 
     attribute :id, :string
     attribute :venue, :string
-    attribute :address_line_1, :string
-    attribute :address_line_2, :string
-    attribute :address_line_3, :string
+    attribute :address_line1, :string
+    attribute :address_line2, :string
+    attribute :address_line3, :string
     attribute :address_city, :string
     attribute :address_postcode, :string
 

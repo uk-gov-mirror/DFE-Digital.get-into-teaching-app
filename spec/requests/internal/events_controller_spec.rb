@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe Internal::EventsController do
+describe Internal::EventsController do
   let(:types) { Events::Search.available_event_type_ids }
   let(:events) do
     5.times.collect do |index|
@@ -17,10 +17,10 @@ RSpec.describe Internal::EventsController do
     context "when any user type" do
       context "when there are no pending events" do
         before do
-          expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
             .to receive(:search_teaching_events_grouped_by_type) { [] }
 
-          get internal_events_path, generate_auth_headers("author")
+          get internal_events_path, headers: generate_auth_headers("author")
         end
         it "shows a no events banner" do
           assert_response :success
@@ -30,10 +30,10 @@ RSpec.describe Internal::EventsController do
 
       context "when there are pending events" do
         before do
-          expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
             .to receive(:search_teaching_events_grouped_by_type) { events_by_type }
 
-          get internal_events_path, generate_auth_headers("author")
+          get internal_events_path, headers: generate_auth_headers("author")
         end
         it "shows pending events" do
           assert_response :success
@@ -46,7 +46,7 @@ RSpec.describe Internal::EventsController do
 
     context "when unauthenticated" do
       it "should reject bad login" do
-        get internal_events_path, generate_auth_headers("wrong")
+        get internal_events_path, headers: generate_auth_headers("wrong")
 
         assert_response :unauthorized
       end
@@ -64,10 +64,10 @@ RSpec.describe Internal::EventsController do
     context "when any user type" do
       context "when the event is pending" do
         before do
-          expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
             .to receive(:get_teaching_event).with(event_to_get_readable_id) { events[0] }
 
-          get internal_event_path(event_to_get_readable_id), generate_auth_headers("author")
+          get internal_event_path(event_to_get_readable_id), headers: generate_auth_headers("author")
         end
         it "shows pending events" do
           assert_response :success
@@ -78,10 +78,10 @@ RSpec.describe Internal::EventsController do
 
       context "when the event is not pending" do
         before do
-          expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
             .to receive(:get_teaching_event).with(event_to_get_readable_id) { events[1] }
 
-          get internal_event_path(event_to_get_readable_id), generate_auth_headers("author")
+          get internal_event_path(event_to_get_readable_id), headers: generate_auth_headers("author")
         end
         it "redirects to not found" do
           assert_response :not_found
@@ -93,10 +93,10 @@ RSpec.describe Internal::EventsController do
     context "when author user type" do
       context "when the event is pending" do
         before do
-          expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
             .to receive(:get_teaching_event).with(event_to_get_readable_id) { events[0] }
 
-          get internal_event_path(event_to_get_readable_id), generate_auth_headers("author")
+          get internal_event_path(event_to_get_readable_id), headers: generate_auth_headers("author")
         end
         it "does not have a final submit button" do
           assert_response :success
@@ -108,10 +108,10 @@ RSpec.describe Internal::EventsController do
     context "when publisher user type" do
       context "when the event is pending" do
         before do
-          expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
             .to receive(:get_teaching_event).with(event_to_get_readable_id) { events[0] }
 
-          get internal_event_path(event_to_get_readable_id), generate_auth_headers("publisher")
+          get internal_event_path(event_to_get_readable_id), headers: generate_auth_headers("publisher")
         end
         it "should have a final submit button" do
           assert_response :success
@@ -122,7 +122,7 @@ RSpec.describe Internal::EventsController do
 
     context "when unauthenticated" do
       it "should reject bad login" do
-        get internal_event_path(event_to_get_readable_id, generate_auth_headers("wrong"))
+        get internal_event_path(event_to_get_readable_id, headers: generate_auth_headers("wrong"))
 
         assert_response :unauthorized
       end
@@ -138,10 +138,10 @@ RSpec.describe Internal::EventsController do
   describe "#new" do
     context "when any user type" do
       before do
-        expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi)
+        allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi)
           .to receive(:get_teaching_event_buildings) { [] }
 
-        get new_internal_event_path, generate_auth_headers("author")
+        get new_internal_event_path, headers: generate_auth_headers("author")
       end
 
       it "should have an events form" do
@@ -152,7 +152,7 @@ RSpec.describe Internal::EventsController do
 
     context "when unauthenticated" do
       it "should reject bad login" do
-        get new_internal_event_path, generate_auth_headers("wrong")
+        get new_internal_event_path, headers: generate_auth_headers("wrong")
 
         assert_response :unauthorized
       end
@@ -169,12 +169,12 @@ RSpec.describe Internal::EventsController do
     let(:event_to_edit_readable_id) { "1" }
     context "when any user type" do
       before do
-        expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi)
+        allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi)
           .to receive(:get_teaching_event_buildings) { [] }
-        expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+        allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
           .to receive(:get_teaching_event).with(event_to_edit_readable_id) { events[0] }
 
-        get edit_internal_event_path(event_to_edit_readable_id), generate_auth_headers("author")
+        get edit_internal_event_path(event_to_edit_readable_id), headers: generate_auth_headers("author")
       end
 
       it "should have an events form with populated fields" do
@@ -185,7 +185,7 @@ RSpec.describe Internal::EventsController do
 
     context "when unauthenticated" do
       it "should reject bad login" do
-        get edit_internal_event_path(event_to_edit_readable_id), generate_auth_headers("wrong")
+        get edit_internal_event_path(event_to_edit_readable_id), headers: generate_auth_headers("wrong")
 
         assert_response :unauthorized
       end
@@ -198,15 +198,70 @@ RSpec.describe Internal::EventsController do
     end
   end
 
+  describe "#create" do
+    context "when any user type" do
+      let(:building_id) { events[0].building.id }
+      let(:params) do
+        attributes_for :internal_event,
+                       { "building": { "id": building_id, "fieldset": "existing" } }
+      end
+      let(:expected_event) do
+        build(:event_api,
+              id: params[:id],
+              name: params[:name],
+              readable_id: params[:readable_id],
+              type_id: GetIntoTeachingApiClient::Constants::EVENT_TYPES["School or University event"],
+              status_id: GetIntoTeachingApiClient::Constants::EVENT_STATUS["Pending"],
+              summary: params[:summary],
+              description: params[:description],
+              is_online: params[:is_online],
+              start_at: params[:start_at].getutc.floor,
+              end_at: params[:end_at].getutc.floor,
+              provider_contact_email: params[:provider_contact_email],
+              provider_organiser: params[:provider_organiser],
+              provider_target_audience: params[:provider_target_audience],
+              provider_website_url: params[:provider_website_url],
+              building: { venue: params[:building][:venue].presence,
+                          addressLine1: params[:building][:address_line1].presence,
+                          addressLine2: params[:building][:address_line2].presence,
+                          addressLine3: params[:building][:address_line3].presence,
+                          addressCity: params[:building][:address_city].presence,
+                          addressPostcode: params[:building][:address_postcode].presence,
+                          id: params[:building][:id].presence })
+      end
+
+      context "when \"select a venue\" is selected" do
+        fit "should post the event and a building id" do
+
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi)
+            .to receive(:get_teaching_event_buildings) { [events[0].building] }
+
+          expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+            .to receive(:upsert_teaching_event).with(expected_event)
+
+          post internal_events_path,
+               headers: generate_auth_headers("author"),
+               params: { internal_event: params }
+
+          expect(response).to redirect_to(internal_events_path(success: :pending))
+        end
+      end
+    end
+
+    # it "should not post a building id when \"new venue\" is selected" do
+    #   assert_response :success
+    #   expect(response.body).to include("value=\"Eventjk 1\"")
+    # end
+  end
+
   private
 
   def generate_auth_headers(user_type)
-    { headers:
-        { "HTTP_AUTHORIZATION" =>
-            ActionController::HttpAuthentication::Basic.encode_credentials(
-              user_type,
-              "password",
-            ) } }
+    { "HTTP_AUTHORIZATION" =>
+        ActionController::HttpAuthentication::Basic.encode_credentials(
+          user_type,
+          "password",
+        ) }
   end
 
 end
