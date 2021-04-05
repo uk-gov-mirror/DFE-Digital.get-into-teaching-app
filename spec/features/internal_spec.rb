@@ -47,6 +47,7 @@ RSpec.feature "Internal section", type: :feature do
     choose "Yes"
     fill_in "internal_event[start_at]", with: Time.zone.now + 1.day
     fill_in "internal_event[end_at]", with: Time.zone.now + 2.days
+    choose "No venue"
 
     click_button "Submit for review"
     expect(page).to have_text "Event submitted for review"
@@ -65,7 +66,7 @@ RSpec.feature "Internal section", type: :feature do
     expect(page).to have_text "Pending Provider Events"
 
     click_link "Event 1"
-    click_button "Edit this provider content"
+    click_button "Edit this provider event"
 
 
   end

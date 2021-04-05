@@ -22,17 +22,15 @@ module Internal
     end
 
     def final_submit
-      # TODO: fix
       @event = GetIntoTeachingApiClient::TeachingEventsApi.new.get_teaching_event(params[:format])
       transform_event(@event)
       @event.start_at = Time.zone.parse(@event.start_at.to_s)
       @event.end_at = Time.zone.parse(@event.end_at.to_s)
       if @event.approve
-        redirect_to internal_events_path(method: :get, success: true)
+        redirect_to internal_events_path(success: true)
       else
         render action: :new
       end
-      # Ensure final submit has building attached
     end
 
     def create
@@ -46,8 +44,8 @@ module Internal
     end
 
     def edit
-      @event = GetIntoTeachingApiClient::TeachingEventsApi.new.get_teaching_event(params[:id])
-      transform_event(@event)
+      event = GetIntoTeachingApiClient::TeachingEventsApi.new.get_teaching_event(params[:id])
+      @event = transform_event(event)
       @event.building.fieldset = "existing"
       render "new"
     end
@@ -77,7 +75,7 @@ module Internal
       @event = Event.new(hash)
       @event.building =
         if event.building.nil?
-          EventBuilding.new
+          nil
         else
           transform_event_building(hash["building"])
         end
@@ -116,7 +114,7 @@ module Internal
           address_line_3
           address_city
           address_postcode
-        ]
+]
       )
     end
 

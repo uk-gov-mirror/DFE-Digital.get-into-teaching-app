@@ -3,10 +3,10 @@ require "rails_helper"
 describe Internal::EventsController do
   let(:types) { Events::Search.available_event_type_ids }
   let(:events) do
-    5.times.collect do |index|
+    2.times.collect do |index|
       start_at = Time.zone.today.at_end_of_month - index.days
       type_id = types[index % types.count]
-      build(:event_api, name: "Event #{index + 1}", start_at: start_at, type_id: type_id)
+      build(:event_api, :with_provider_info, name: "Event #{index + 1}", start_at: start_at, type_id: type_id)
     end
   end
   let(:events_by_type) { group_events_by_type(events) }
@@ -317,7 +317,209 @@ describe Internal::EventsController do
     end
   end
 
-  private
+  describe "#update" do
+    context "when any user type" do
+      let(:building_id) { events[0].building.id }
+      let(:expected_request_body) do
+        build(:event_api,
+              id: params[:id],
+              name: params[:name],
+              readable_id: params[:readable_id],
+              type_id: GetIntoTeachingApiClient::Constants::EVENT_TYPES["School or University event"],
+              status_id: GetIntoTeachingApiClient::Constants::EVENT_STATUS["Pending"],
+              summary: params[:summary],
+              description: params[:description],
+              is_online: params[:is_online],
+              start_at: params[:start_at].getutc.floor,
+              end_at: params[:end_at].getutc.floor,
+              provider_contact_email: params[:provider_contact_email],
+              provider_organiser: params[:provider_organiser],
+              provider_target_audience: params[:provider_target_audience],
+              provider_website_url: params[:provider_website_url])
+      end
+
+      context "when \"select a venue\" is selected" do
+        let(:params) do
+          attributes_for :internal_event,
+                         { "building": { "id": building_id, "fieldset": "existing" } }
+        end
+        it "should post the event and an existing building" do
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi)
+            .to receive(:get_teaching_event_buildings) { [events[0].building] }
+
+          expected_request_body.building =
+            build(:event_building_api, { id: params[:building][:id] })
+
+          expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+            .to receive(:upsert_teaching_event).with(expected_request_body)
+
+          put internal_event_path(expected_request_body.readable_id),
+              headers: generate_auth_headers("author"),
+              params: { internal_event: params }
+
+          expect(response).to redirect_to(internal_events_path(success: :pending))
+        end
+      end
+
+      context "when \"no venue\" is selected" do
+        let(:params) do
+          attributes_for :internal_event,
+                         { "building": { "fieldset": "none" } }
+        end
+        it "should post no building" do
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi)
+            .to receive(:get_teaching_event_buildings) { [events[0].building] }
+
+          expected_request_body.building = nil
+
+          expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+            .to receive(:upsert_teaching_event).with(expected_request_body)
+
+          put internal_event_path(expected_request_body.readable_id),
+              headers: generate_auth_headers("author"),
+              params: { internal_event: params }
+
+          expect(response).to redirect_to(internal_events_path(success: :pending))
+        end
+      end
+
+      context "when \"add a building\" is selected" do
+        let(:expected_venue) { "New venue" }
+        let(:params) do
+          attributes_for :internal_event,
+                         { "building":
+                             { "id": building_id,
+                               "venue": expected_venue,
+                               "fieldset": "add" } }
+        end
+        it "should post new building fields with no id" do
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi)
+            .to receive(:get_teaching_event_buildings) { [events[0].building] }
+
+          expected_request_body.building =
+            build(:event_building_api, {
+              id: nil,
+              venue: expected_venue,
+              address_line1: nil,
+              address_line2: nil,
+              address_line3: nil,
+              address_city: nil,
+              address_postcode: nil,
+
+            })
+
+          expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+            .to receive(:upsert_teaching_event).with(expected_request_body)
+
+          put internal_event_path(expected_request_body.readable_id),
+              headers: generate_auth_headers("author"),
+              params: { internal_event: params }
+
+          expect(response).to redirect_to(internal_events_path(success: :pending))
+        end
+      end
+    end
+
+    context "when unauthenticated" do
+      it "should reject bad login" do
+        put internal_event_path("any"),
+            headers: generate_auth_headers("wrong")
+
+        assert_response :unauthorized
+      end
+
+      it "should reject no authentication" do
+        put internal_event_path("any")
+
+        assert_response :unauthorized
+      end
+    end
+  end
+
+  describe "#final_submit" do
+    context "when any user type" do
+      let(:event) { events[0] }
+      let(:expected_request_body) do
+        build(:event_api,
+              id: event.id,
+              name: event.name,
+              readable_id: event.readable_id,
+              type_id: GetIntoTeachingApiClient::Constants::EVENT_TYPES["School or University event"],
+              status_id: GetIntoTeachingApiClient::Constants::EVENT_STATUS["Open"],
+              summary: event.summary,
+              description: event.description,
+              is_online: event.is_online,
+              start_at: event.start_at,
+              end_at: event.end_at,
+              provider_contact_email: event.provider_contact_email,
+              provider_organiser: event.provider_organiser,
+              provider_target_audience: event.provider_target_audience,
+              provider_website_url: event.provider_website_url)
+
+      end
+
+      context "when event has no building" do
+        let(:params) { { "format": event.id } }
+
+        it "should post the event with event status open" do
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+            .to receive(:get_teaching_event).with(event.id) { event }
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi)
+            .to receive(:get_teaching_event_buildings) { [] }
+
+          event.building = nil
+          expected_request_body.building = nil
+
+          expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+            .to receive(:upsert_teaching_event).with(expected_request_body)
+
+          put internal_final_submit_path,
+              headers: generate_auth_headers("author"),
+              params: params
+
+          expect(response).to redirect_to(internal_events_path(success: true))
+        end
+      end
+
+      context "when event has a building" do
+        let(:params) { { "format": event.id } }
+
+        it "should post the event with event status open" do
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+            .to receive(:get_teaching_event).with(event.id) { event }
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi)
+            .to receive(:get_teaching_event_buildings) { [] }
+
+          expected_request_body.building = event.building
+
+          expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+            .to receive(:upsert_teaching_event).with(expected_request_body)
+
+          put internal_final_submit_path,
+              headers: generate_auth_headers("author"),
+              params: params
+
+          expect(response).to redirect_to(internal_events_path(success: true))
+        end
+      end
+    end
+
+    context "when unauthenticated" do
+      it "should reject bad login" do
+        put internal_final_submit_path("any"), headers: generate_auth_headers("wrong")
+
+        assert_response :unauthorized
+      end
+
+      it "should reject no authentication" do
+        put internal_final_submit_path("any")
+
+        assert_response :unauthorized
+      end
+    end
+  end
+
+private
 
   def generate_auth_headers(user_type)
     { "HTTP_AUTHORIZATION" =>
