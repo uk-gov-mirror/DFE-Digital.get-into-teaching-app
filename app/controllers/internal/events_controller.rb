@@ -22,8 +22,8 @@ module Internal
     end
 
     def final_submit
-      @event = GetIntoTeachingApiClient::TeachingEventsApi.new.get_teaching_event(params[:format])
-      transform_event(@event)
+      event = GetIntoTeachingApiClient::TeachingEventsApi.new.get_teaching_event(params[:format])
+      @event = transform_event(event)
       @event.start_at = Time.zone.parse(@event.start_at.to_s)
       @event.end_at = Time.zone.parse(@event.end_at.to_s)
       if @event.approve
@@ -46,7 +46,7 @@ module Internal
     def edit
       event = GetIntoTeachingApiClient::TeachingEventsApi.new.get_teaching_event(params[:id])
       @event = transform_event(event)
-      @event.building.fieldset = "existing"
+      @event.building = EventBuilding.new(fieldset: "none") if @event.building.nil?
       render "new"
     end
 
@@ -72,13 +72,14 @@ module Internal
 
     def transform_event(event)
       hash = event.to_hash.transform_keys { |k| k.to_s.underscore }.filter { |k| Event.attribute_names.include?(k) }
-      @event = Event.new(hash)
-      @event.building =
+      internal_event = Event.new(hash)
+      internal_event.building =
         if event.building.nil?
           nil
         else
           transform_event_building(hash["building"])
         end
+      internal_event
     end
 
     def transform_event_building(building)
@@ -114,7 +115,7 @@ module Internal
           address_line_3
           address_city
           address_postcode
-]
+        ],
       )
     end
 

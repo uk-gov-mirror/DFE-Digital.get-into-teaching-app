@@ -24,7 +24,7 @@
     <% end %>
     <label for="internal_event[description]" class="govuk-label">Event description</label>
     <%= f.hidden_field :description, class: "event-description" %>
-    <trix-editor class="<%= class_names("govuk-input", "event-description", { "govuk-input--error": @event.errors[:description].any? }) %>">
+    <trix-editor class="<%= class_names("govuk-input", "event-description", { "govuk-input--error": @event.errors[:description].any? }) %>"
                    input="internal_event_description">
     </trix-editor>
   </div>
@@ -67,7 +67,6 @@
       <%= b.hidden_field :id %>
       <%= b.govuk_radio_buttons_fieldset(:fieldset, legend: { size: 'm', text: 'Event venue' }) do %>
         <%= b.govuk_radio_button :fieldset, 'none', label: { text: 'No venue' } %>
-        <%= b.govuk_radio_divider %>
         <%= b.govuk_radio_button :fieldset, 'existing', label: { text: 'Search existing venues' } do %>
           <%= b.govuk_collection_select :id,
                                         @buildings,
@@ -76,7 +75,6 @@
                                         label: { text: 'Search for existing buildings' },
                                         options: { include_blank: "" } %>
         <% end %>
-        <%= b.govuk_radio_divider %>
         <%= b.govuk_radio_button :fieldset, 'add', label: { text: 'Add a new venue' } do %>
           <%= b.govuk_text_field :venue, label: { text: 'Venue' } %>
           <%= b.govuk_text_field :address_line1, label: { text: 'Address line 1' } %>
