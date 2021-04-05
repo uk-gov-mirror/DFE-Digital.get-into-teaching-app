@@ -46,7 +46,11 @@ module Internal
     def edit
       event = GetIntoTeachingApiClient::TeachingEventsApi.new.get_teaching_event(params[:id])
       @event = transform_event(event)
-      @event.building = EventBuilding.new(fieldset: "none") if @event.building.nil?
+      if @event.building.nil?
+        @event.building = EventBuilding.new(fieldset: "none")
+      else
+        @event.building.fieldset = "existing"
+      end
       render "new"
     end
 
@@ -54,7 +58,7 @@ module Internal
       create
     end
 
-    private
+  private
 
     def format_building(building_params)
       case building_params[:fieldset]

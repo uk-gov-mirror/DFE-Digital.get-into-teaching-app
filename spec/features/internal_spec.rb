@@ -7,7 +7,13 @@ RSpec.feature "Internal section", type: :feature do
     5.times.collect do |index|
       start_at = Time.zone.today.at_end_of_month - index.days
       type_id = types[index % types.count]
-      build(:event_api, name: "Event #{index + 1}", start_at: start_at, type_id: type_id)
+      status_id = GetIntoTeachingApiClient::Constants::EVENT_STATUS["Pending"]
+      build(:event_api,
+            :with_provider_info,
+            name: "Event #{index + 1}",
+            start_at: start_at,
+            type_id: type_id,
+            status_id: status_id)
     end
   end
   let(:events_by_type) { group_events_by_type(events) }
@@ -18,21 +24,22 @@ RSpec.feature "Internal section", type: :feature do
     end
 
     allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi).to \
-        receive(:search_teaching_events_grouped_by_type) { events_by_type }
+      receive(:search_teaching_events_grouped_by_type) { events_by_type }
 
     allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi).to \
-        receive(:get_teaching_event_buildings) { [] }
+      receive(:get_teaching_event_buildings) { [] }
   end
 
   scenario "Submit a new form" do
     allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi).to \
-        receive(:upsert_teaching_event) { [] }
+      receive(:upsert_teaching_event) { [] }
 
     visit internal_events_path
     expect(page).to have_text "Pending Provider Events"
 
     click_button "Submit a provider event for review"
     expect(page).to have_text("Provider Event Details")
+    expect(page).to have_checked_field("Search existing venues")
 
     fill_in "Event name", with: "test"
     fill_in "External event name", with: "test"
@@ -53,40 +60,61 @@ RSpec.feature "Internal section", type: :feature do
     expect(page).to have_text "Event submitted for review"
   end
 
-  scenario "Submit final" do
+  scenario "Edit a pending event with no building" do
     allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi).to \
-        receive(:upsert_teaching_event) { [] }
+      receive(:upsert_teaching_event) { [] }
 
     allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi).to \
-        receive(:get_teaching_event) { events[0] }
+      receive(:get_teaching_event) { events[0] }
 
-
+    events[0].building = nil
 
     visit internal_events_path
     expect(page).to have_text "Pending Provider Events"
 
     click_link "Event 1"
+    expect(page).to have_text("This is a pending event")
+
     click_button "Edit this provider event"
+    expect(page).to have_text("Provider Event Details")
+    expect(page).to have_checked_field("No venue")
 
-
+    click_button "Submit for review"
+    expect(page).to have_text "Event submitted for review"
   end
 
-  # scenario "Edit a pending event" do
-  #   allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi).to \
-  #       receive(:upsert_teaching_event) { [] }
-  #
-  #   allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi).to \
-  #       receive(:get_teaching_event) { events[0] }
-  #
-  #
-  #   visit internal_events_path
-  #   expect(page).to have_text "Pending Provider Events"
-  #
-  #   click_link "Event name"
-  #
-  #   click_button "Edit this provider content"
-  #
-  #
-  #   ## event name should have text
-  # end
+  scenario "Edit a pending event with building" do
+    allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi).to \
+      receive(:upsert_teaching_event) { [] }
+
+    allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi).to \
+      receive(:get_teaching_event) { events[0] }
+
+    visit internal_events_path
+    expect(page).to have_text "Pending Provider Events"
+
+    click_link "Event 1"
+    expect(page).to have_text("This is a pending event")
+
+    click_button "Edit this provider event"
+    expect(page).to have_text("Provider Event Details")
+    expect(page).to have_checked_field("Search existing venues")
+  end
+
+  scenario "Final submit" do
+    allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi).to \
+      receive(:upsert_teaching_event) { [] }
+
+    allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi).to \
+      receive(:get_teaching_event) { events[0] }
+
+    visit internal_events_path
+    expect(page).to have_text "Pending Provider Events"
+
+    click_link "Event 1"
+    expect(page).to have_text("This is a pending event")
+
+    click_button "Submit this provider event"
+    expect(page).to have_text("Event submitted")
+  end
 end
