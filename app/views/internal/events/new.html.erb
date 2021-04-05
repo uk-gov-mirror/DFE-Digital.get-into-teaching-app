@@ -16,18 +16,16 @@
 
   <%= f.govuk_text_area :summary, label: { text: 'Event summary' } %>
 
-  <div class=
-    <%= @event.errors[:description].any? ? "govuk-form-group--error" : "govuk-form-group" %>>
+  <div class="<%= class_names("govuk-form-group", { "govuk-form-group--error": @event.errors[:description].any? }) %>">
     <% if @event.errors[:description].any? %>
-    <span class="govuk-error-message">
-      <span class="govuk-visually-hidden">Error:</span><%= @event.errors[:description][0] %>
-    </span>
-
+      <span class="govuk-error-message">
+        <span class="govuk-visually-hidden">Error:</span><%= @event.errors[:description][0] %>
+      </span>
     <% end %>
     <label for="internal_event[description]" class="govuk-label">Event description</label>
     <%= f.hidden_field :description, class: "event-description" %>
-    <trix-editor class="govuk-form-group govuk-input event-description"
-                 input="internal_event_description">
+    <trix-editor class="<%= class_names("govuk-input", "event-description", { "govuk-input--error": @event.errors[:description].any? }) %>">
+                   input="internal_event_description">
     </trix-editor>
   </div>
 
@@ -42,21 +40,27 @@
     <%= f.govuk_radio_button :is_online, false, label: { text: 'No' } %>
   <% end %>
 
-  <% if @event.errors[:start_at].any? %>
+  <div class="<%= class_names("govuk-form-group", { "govuk-form-group--error": @event.errors[:start_at].any? }) %>">
+    <% if @event.errors[:start_at].any? %>
     <span class="govuk-error-message">
       <span class="govuk-visually-hidden">Error:</span><%= @event.errors[:start_at][0] %>
     </span>
-  <% end %>
-  <h3 class="govuk-label">Start at</h3>
-  <%= f.datetime_field :start_at, class: "govuk-input datetime" %>
+    <% end %>
+    <h3 class="govuk-label">Start at</h3>
+    <%= f.datetime_field :start_at, class: class_names("datetime", "govuk-input",
+                                                       { "govuk-input--error": @event.errors[:start_at].any? }) %>
+  </div>
 
-  <% if @event.errors[:end_at].any? %>
+  <div class="<%= class_names("govuk-form-group", { "govuk-form-group--error": @event.errors[:end_at].any? }) %>">
+    <% if @event.errors[:end_at].any? %>
     <span class="govuk-error-message">
       <span class="govuk-visually-hidden">Error:</span><%= @event.errors[:end_at][0] %>
     </span>
-  <% end %>
-  <h3 class="govuk-label">End at</h3>
-  <%= f.datetime_field :end_at, class: "govuk-input datetime" %>
+    <% end %>
+    <h3 class="govuk-label">End at</h3>
+    <%= f.datetime_field :end_at, class: class_names("datetime", "govuk-input",
+                                                       { "govuk-input--error": @event.errors[:end_at].any? }) %>
+  </div>
 
   <div class="no-left-margin">
     <%= f.fields_for :building, @event.building do |b| %>

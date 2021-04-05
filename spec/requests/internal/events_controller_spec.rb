@@ -201,11 +201,7 @@ describe Internal::EventsController do
   describe "#create" do
     context "when any user type" do
       let(:building_id) { events[0].building.id }
-      let(:params) do
-        attributes_for :internal_event,
-                       { "building": { "id": building_id, "fieldset": "existing" } }
-      end
-      let(:expected_event) do
+      let(:expected_request_body) do
         build(:event_api,
               id: params[:id],
               name: params[:name],
@@ -222,22 +218,33 @@ describe Internal::EventsController do
               provider_target_audience: params[:provider_target_audience],
               provider_website_url: params[:provider_website_url],
               building: { venue: params[:building][:venue].presence,
-                          addressLine1: params[:building][:address_line1].presence,
-                          addressLine2: params[:building][:address_line2].presence,
-                          addressLine3: params[:building][:address_line3].presence,
-                          addressCity: params[:building][:address_city].presence,
-                          addressPostcode: params[:building][:address_postcode].presence,
+                          address_line1: params[:building][:address_line1].presence,
+                          address_line2: params[:building][:address_line2].presence,
+                          address_line3: params[:building][:address_line3].presence,
+                          address_city: params[:building][:address_city].presence,
+                          address_postcode: params[:building][:address_postcode].presence,
                           id: params[:building][:id].presence })
       end
 
       context "when \"select a venue\" is selected" do
+        let(:params) do
+          attributes_for :internal_event,
+                         { "building": { "id": building_id, "fieldset": "existing" } }
+        end
         fit "should post the event and a building id" do
-
           allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi)
             .to receive(:get_teaching_event_buildings) { [events[0].building] }
 
+          expected_request_body.building = { venue: events[0].building.venue,
+                                             address_line1: events[0].building.address_line1, }
+          # addressLine2: params[:building][:address_line2].presence,
+          # addressLine3: params[:building][:address_line3].presence,
+          # addressCity: params[:building][:address_city].presence,
+          # addressPostcode: params[:building][:address_postcode].presence,
+          # id: params[:building][:id].presence }
+
           expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
-            .to receive(:upsert_teaching_event).with(expected_event)
+            .to receive(:upsert_teaching_event).with(expected_request_body)
 
           post internal_events_path,
                headers: generate_auth_headers("author"),
@@ -246,12 +253,34 @@ describe Internal::EventsController do
           expect(response).to redirect_to(internal_events_path(success: :pending))
         end
       end
-    end
 
-    # it "should not post a building id when \"new venue\" is selected" do
-    #   assert_response :success
-    #   expect(response.body).to include("value=\"Eventjk 1\"")
-    # end
+      context "when \"no venue\" is selected" do
+        let(:params) do
+          attributes_for :internal_event,
+                         { "building": { "fieldset": "none" } }
+        end
+        it "should post no building" do
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi)
+            .to receive(:get_teaching_event_buildings) { [events[0].building] }
+
+          # expected_request_body.building = nil
+
+          expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+            .to receive(:upsert_teaching_event).with(expected_request_body)
+
+          post internal_events_path,
+               headers: generate_auth_headers("author"),
+               params: { internal_event: params }
+
+          expect(response).to redirect_to(internal_events_path(success: :pending))
+        end
+      end
+
+      # it "should not post a building id when \"new venue\" is selected" do
+      #   assert_response :success
+      #   expect(response.body).to include("value=\"Eventjk 1\"")
+      # end
+    end
   end
 
   private
@@ -263,5 +292,4 @@ describe Internal::EventsController do
           "password",
         ) }
   end
-
 end

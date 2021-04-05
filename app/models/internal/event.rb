@@ -86,18 +86,20 @@ module Internal
         providerContactEmail: provider_contact_email,
         providerOrganiser: provider_organiser,
         providerTargetAudience: provider_target_audience,
-        providerWebsiteUrl: provider_website_url,
-        building: { venue: building.venue.presence,
-                    addressLine1: building.address_line1.presence,
-                    addressLine2: building.address_line2.presence,
-                    addressLine3: building.address_line3.presence,
-                    addressCity: building.address_city.presence,
-                    addressPostcode: building.address_postcode.presence,
-                    id: building.id.presence },
-      )
+        providerWebsiteUrl: provider_website_url)
+
+      if building.present?
+        body.building = { venue: building.venue.presence,
+                          addressLine1: building.address_line1.presence,
+                          addressLine2: building.address_line2.presence,
+                          addressLine3: building.address_line3.presence,
+                          addressCity: building.address_city.presence,
+                          addressPostcode: building.address_postcode.presence,
+                          id: building.id.presence }
+      end
 
       begin
-        GetIntoTeachingApiClient::TeachingEventsApi.new.upsert_teaching_event(body)
+        # GetIntoTeachingApiClient::TeachingEventsApi.new.upsert_teaching_event(body)
 
         true
       rescue GetIntoTeachingApiClient::ApiError => e

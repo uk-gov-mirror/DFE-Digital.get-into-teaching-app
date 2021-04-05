@@ -37,7 +37,8 @@ module Internal
 
     def create
       @event = Event.new(event_params)
-      @event.building = EventBuilding.new(event_params["building"])
+      building = format_building(event_params["building"])
+      @event.building = building[0] unless building.nil?
       if @event.submit_pending
         redirect_to internal_events_path(success: :pending)
       else
@@ -62,10 +63,11 @@ module Internal
       case building_params[:fieldset]
       when "existing"
         building = @buildings.select { |b| b.id == building_params[:id] }
-        building.first.to_hash
+        transform_event_building(building.first.to_hash)
       when "add"
         building = building_params.to_hash
         building.id = nil # Id may be present from previous selection
+        transform_event_building(building)
       else
         building = nil
       end
