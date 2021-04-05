@@ -216,14 +216,7 @@ describe Internal::EventsController do
               provider_contact_email: params[:provider_contact_email],
               provider_organiser: params[:provider_organiser],
               provider_target_audience: params[:provider_target_audience],
-              provider_website_url: params[:provider_website_url],
-              building: { venue: params[:building][:venue].presence,
-                          address_line1: params[:building][:address_line1].presence,
-                          address_line2: params[:building][:address_line2].presence,
-                          address_line3: params[:building][:address_line3].presence,
-                          address_city: params[:building][:address_city].presence,
-                          address_postcode: params[:building][:address_postcode].presence,
-                          id: params[:building][:id].presence })
+              provider_website_url: params[:provider_website_url])
       end
 
       context "when \"select a venue\" is selected" do
@@ -231,17 +224,12 @@ describe Internal::EventsController do
           attributes_for :internal_event,
                          { "building": { "id": building_id, "fieldset": "existing" } }
         end
-        fit "should post the event and a building id" do
+        it "should post the event and an existing building" do
           allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi)
             .to receive(:get_teaching_event_buildings) { [events[0].building] }
 
-          expected_request_body.building = { venue: events[0].building.venue,
-                                             address_line1: events[0].building.address_line1, }
-          # addressLine2: params[:building][:address_line2].presence,
-          # addressLine3: params[:building][:address_line3].presence,
-          # addressCity: params[:building][:address_city].presence,
-          # addressPostcode: params[:building][:address_postcode].presence,
-          # id: params[:building][:id].presence }
+          expected_request_body.building =
+            build(:event_building_api, { id: params[:building][:id] })
 
           expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
             .to receive(:upsert_teaching_event).with(expected_request_body)
@@ -263,7 +251,7 @@ describe Internal::EventsController do
           allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi)
             .to receive(:get_teaching_event_buildings) { [events[0].building] }
 
-          # expected_request_body.building = nil
+          expected_request_body.building = nil
 
           expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
             .to receive(:upsert_teaching_event).with(expected_request_body)
@@ -276,10 +264,56 @@ describe Internal::EventsController do
         end
       end
 
-      # it "should not post a building id when \"new venue\" is selected" do
-      #   assert_response :success
-      #   expect(response.body).to include("value=\"Eventjk 1\"")
-      # end
+      context "when \"add a building\" is selected" do
+        let(:expected_venue) { "New venue" }
+        let(:params) do
+          attributes_for :internal_event,
+                         { "building":
+                             { "id": building_id,
+                               "venue": expected_venue,
+                               "fieldset": "add" } }
+        end
+        it "should post new building fields with no id" do
+          allow_any_instance_of(GetIntoTeachingApiClient::TeachingEventBuildingsApi)
+            .to receive(:get_teaching_event_buildings) { [events[0].building] }
+
+          expected_request_body.building =
+            build(:event_building_api, {
+              id: nil,
+              venue: expected_venue,
+              address_line1: nil,
+              address_line2: nil,
+              address_line3: nil,
+              address_city: nil,
+              address_postcode: nil,
+
+            })
+
+          expect_any_instance_of(GetIntoTeachingApiClient::TeachingEventsApi)
+            .to receive(:upsert_teaching_event).with(expected_request_body)
+
+          post internal_events_path,
+               headers: generate_auth_headers("author"),
+               params: { internal_event: params }
+
+          expect(response).to redirect_to(internal_events_path(success: :pending))
+        end
+      end
+    end
+
+    context "when unauthenticated" do
+      it "should reject bad login" do
+        post internal_events_path,
+             headers: generate_auth_headers("wrong")
+
+        assert_response :unauthorized
+      end
+
+      it "should reject no authentication" do
+        post internal_events_path
+
+        assert_response :unauthorized
+      end
     end
   end
 

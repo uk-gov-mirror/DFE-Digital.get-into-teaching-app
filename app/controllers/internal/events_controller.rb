@@ -4,7 +4,7 @@ module Internal
     layout "internal"
 
     def index
-      @no_results = load_pending_events
+      @no_results = load_pending_events.blank?
     end
 
     def show
@@ -37,8 +37,7 @@ module Internal
 
     def create
       @event = Event.new(event_params)
-      building = format_building(event_params["building"])
-      @event.building = building[0] unless building.nil?
+      @event.building = format_building(event_params["building"])
       if @event.submit_pending
         redirect_to internal_events_path(success: :pending)
       else
@@ -63,15 +62,14 @@ module Internal
       case building_params[:fieldset]
       when "existing"
         building = @buildings.select { |b| b.id == building_params[:id] }
-        transform_event_building(building.first.to_hash)
+        transform_event_building(building.first&.to_hash)
       when "add"
         building = building_params.to_hash
-        building.id = nil # Id may be present from previous selection
-        transform_event_building(building)
+        building[:id] = nil # Id may be present from previous selection
+        EventBuilding.new(building)
       else
-        building = nil
+        nil
       end
-      building
     end
 
     def transform_event(event)
@@ -136,7 +134,6 @@ module Internal
       unless @events.nil?
         @events = Kaminari.paginate_array(@events).page(params[:page])
       end
-      @events.blank?
     end
   end
 end
