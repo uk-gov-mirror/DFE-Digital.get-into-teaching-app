@@ -69,8 +69,6 @@ module Internal
         building = building_params.to_hash
         building[:id] = nil # Id may be present from previous selection
         EventBuilding.new(building)
-      else
-        nil
       end
     end
 

@@ -55,7 +55,7 @@ module Internal
       submit
     end
 
-    private
+  private
 
     def submit
       return false if invalid?
@@ -86,7 +86,8 @@ module Internal
         providerContactEmail: provider_contact_email,
         providerOrganiser: provider_organiser,
         providerTargetAudience: provider_target_audience,
-        providerWebsiteUrl: provider_website_url)
+        providerWebsiteUrl: provider_website_url,
+      )
 
       if building.present?
         body.building = GetIntoTeachingApiClient::TeachingEventBuilding.new(
@@ -96,7 +97,8 @@ module Internal
           addressLine3: building.address_line3.presence,
           addressCity: building.address_city.presence,
           addressPostcode: building.address_postcode.presence,
-          id: building.id.presence)
+          id: building.id.presence,
+        )
       end
 
       begin

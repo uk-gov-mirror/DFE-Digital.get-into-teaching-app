@@ -4,7 +4,7 @@ require "action_text/system_test_helper"
 RSpec.feature "Internal section", type: :feature do
   let(:types) { Events::Search.available_event_type_ids }
   let(:events) do
-    5.times.collect do |index|
+    1.times.collect do |index|
       start_at = Time.zone.today.at_end_of_month - index.days
       type_id = types[index % types.count]
       status_id = GetIntoTeachingApiClient::Constants::EVENT_STATUS["Pending"]

@@ -455,7 +455,6 @@ describe Internal::EventsController do
               provider_organiser: event.provider_organiser,
               provider_target_audience: event.provider_target_audience,
               provider_website_url: event.provider_website_url)
-
       end
 
       context "when event has no building" do
@@ -522,10 +521,18 @@ describe Internal::EventsController do
 private
 
   def generate_auth_headers(user_type)
+    if user_type == "publisher"
+      username = ENV["PUBLISHER_USERNAME"]
+      password = ENV["PUBLISHER_PASSWORD"]
+    elsif user_type == "author"
+      username = ENV["AUTHOR_USERNAME"]
+      password = ENV["AUTHOR_PASSWORD"]
+    end
+
     { "HTTP_AUTHORIZATION" =>
         ActionController::HttpAuthentication::Basic.encode_credentials(
-          user_type,
-          "password",
+          username,
+          password,
         ) }
   end
 end
