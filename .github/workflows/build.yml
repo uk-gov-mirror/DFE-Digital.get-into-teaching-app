@@ -64,7 +64,7 @@ jobs:
           password: ${{ steps.azSecret.outputs.DOCKER-PASSWORD }}
 
       - name: Build and push to Docker Hub
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           builder: ${{ steps.buildx.outputs.name }}
           cache-from: type=local,src=/tmp/.buildx-cache
