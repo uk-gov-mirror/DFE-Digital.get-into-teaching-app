@@ -41,7 +41,7 @@ describe PagesController, type: :request do
         Nokogiri::HTML(response.body).at('meta[name="description"]')&.[]("content")
       end
 
-      context "during the 2025 funding window" do
+      context "when in the 2025 funding window" do
         before { get "/landing/how-to-fund-your-teacher-training?branch=2025" }
 
         it "renders the timed description advertising the scholarship amount" do
@@ -53,7 +53,7 @@ describe PagesController, type: :request do
         end
       end
 
-      context "outside the funding windows" do
+      context "when outside the funding windows" do
         before { get "/landing/how-to-fund-your-teacher-training?branch=default" }
 
         it "falls back to the default description without the amount" do
